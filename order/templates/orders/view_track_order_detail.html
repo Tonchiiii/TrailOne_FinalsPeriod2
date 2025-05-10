@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Shipment Detail{% endblock %}
+
+{% block page_name %}Shipment Detail{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="content-wrapper">
+      <h1 class="page-title">Track Order</h1>
+      {% if messages %}
+      <div class="flash-messages">
+          {% for message in messages %}
+              {% if message.tags == 'status_changed' %}
+                  <div class="alert alert-success">
+                      {{ message }}
+                      <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+                  </div>
+              {% elif message.tags == 'status_to_delivered' %}
+                  <div class="alert alert-info">
+                      {{ message }}
+                      <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+                  </div>
+              {% elif message.tags == 'missing_data_error' %}
+                  <div class="alert alert-danger">
+                      {{ message }}
+                      <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+                  </div>
+              {% endif %}
+          {% endfor %}
+      </div>
+      {% endif %}
+      
+
+      <div class="order-details-container">
+        <div class="order-header">
+          <div>
+            <h2 style="color: #4d3629; font-size: 24px;">Order #{{ shipment.shipment_id }}</h2>
+            <span class="status-badge {% if shipment.status == 'delivered' %}status-completed{% else %}status-pending{% endif %}" id="order-status-badge">
+              {{ shipment.status|title }}
+            </span>
+          </div>
+          <div>
+            <strong>Date Created:</strong> {{ shipment.date_created }}
+          </div>
+        </div>
+        
+        <div class="order-details-section">
+          <div class="details-card">
+            <h3>Client Information</h3>
+            <div class="details-item">
+              <span class="label">Client Name</span>
+              <span>{{ shipment.user.name }}</span>
+            </div>
+            <div class="details-item">
+              <span class="label">Email</span>
+              <span>{{ shipment.user.email }}</span>
+            </div>
+          </div>
+        
+          <div class="details-card">
+            <h3>Order Summary</h3>
+            <div class="details-item">
+              <span class="label">Total Items</span>
+              <span id="total-items">{{ total_quantity }}</span>
+            </div>
+            {% if shipment.status == 'delivered' %}
+                <div class="details-item">
+                <span class="label">Missing Items</span>
+                <span id="missing-items">{{ missing_quantity }}</span>
+                </div>
+            {% endif %}
+          </div>
+        </div>
+        {% if request.session.user_role == 'CLIENT' and shipment.status == 'under_review' %}
+        <form method="POST" action="{% url 'submit_missing_items' shipment_id=shipment.shipment_id %}">
+        {% csrf_token %}
+        {% endif %}
+        <div class="order-details-section" style="grid-template-columns: 1fr;">
+          <div class="details-card">
+            <h3>Products</h3>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                      <th>Product ID</th>
+                      <th>Description</th>
+                      <th>Quantity</th>
+                      {% if request.session.user_role == 'CLIENT' and shipment.status == 'under_review' %}
+                      <th>Missing Quantity</th>
+                    {% endif %}
+                    </tr>
+                  </thead>
+                  <tbody id="products-tbody">
+                    {% for item in shipment.items.all %}
+                      <tr data-item-id="{{ item.id }}">
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        {% if request.session.user_role == 'CLIENT' and shipment.status == 'under_review' %}
+                        <td>
+                          <input type="number" name="missing_qty_{{ item.id }}" min="0" max="{{ item.quantity }}" style="width: 80px;" placeholder="0">
+                        </td>
+                      {% endif %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+            {% if request.session.user_role == 'CLIENT' and shipment.status == 'under_review' %}
+                <div style="margin-top: 10px;">
+                <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+            {% endif %}
+
+            {% if shipment.status != 'under_review' and shipment.status != 'delivered' %}
+                {% if next_status %}
+                    <form method="POST" id="change-status-form" action="{% url 'change_shipment_status' shipment_id=shipment.shipment_id %}">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-primary" onclick="confirmChangeStatus()">
+                            Change Status to {{ next_status|title }}
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+            <!-- <button class="btn btn-primary" id="receive-order-btn" onclick="toggleOrderStatus()">
+                {% if shipment.status == 'delivered' %}
+                    Mark as Pending
+                {% else %}
+                    Order Received
+                {% endif %}
+            </button>               -->
+          <!-- <button class="btn btn-secondary" onclick="printOrder()">Print Order</button> -->    
+          <!-- <button class="btn btn-primary" onclick="downloadInvoice()">Download Invoice</button>  -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    function confirmChangeStatus() {
+        // Show confirmation dialog
+        const confirmation = confirm("Are you sure you want to change the status?");
+        
+        if (confirmation) {
+            // If confirmed, submit the form
+            document.getElementById("change-status-form").submit();
+        }
+    }
+  </script>
+{% endblock %}

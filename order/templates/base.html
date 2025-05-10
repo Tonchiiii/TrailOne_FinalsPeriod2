@@ -1,0 +1,145 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{% static 'css/style2.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sen:wght@400;700&display=swap" rel="stylesheet">
+  <title>{% block title %}TrailOne - Tracking System{% endblock %}</title>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Logo -->
+    <div class="logo-container">
+      <div class="logo">
+        <img src="{% static 'images/logo1.png' %}" alt="Logo" width="100">
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}" 
+      style="color: {% if request.path == '/dashboard/' %}orange{% else %}inherit{% endif %};">
+        <img src="{% static 'images/Group 7(1).png' %}" width="24" height="24" alt="Dashboard Icon">
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'view_track_orders' %}" class="nav-link {% if request.path == '/orders/track' %}active{% endif %}" 
+        style="color: {% if request.path == '/orders/track/' %}orange{% else %}inherit{% endif %};">
+        <img src="{% static 'images/Group 13.png' %}" width="24" height="24" alt="Track Icon">
+        <span>Track</span>
+      </a>
+
+      {% if request.session.user_role != 'CLIENT' %}
+        <a href="{% url 'view_create_orders' %}" class="nav-link {% if request.path == '/orders/create' %}active{% endif %}" 
+            style="color: {% if request.path == '/orders/create/' %}orange{% else %}inherit{% endif %};">
+          <img src="{% static 'images/Group 44.png' %}" width="24" height="24" alt="New Icon">
+          <span>New</span>
+        </a>
+      {% endif %}
+
+      <a href="{% url 'account' %}" class="nav-link {% if request.path == '/account/' %}active{% endif %}" 
+      style="color: {% if request.path == '/account/' %}orange{% else %}inherit{% endif %};">
+        <img src="{% static 'images/Group 21.png' %}" width="24" height="24" alt="Settings Icon">
+        <span>Account</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="content-wrapper">
+      <div class="header-wrapper">
+        <h1 class="page-title">{% block page_name %}{% endblock %}</h1>
+      </div>
+
+      {% block content %}
+      {% endblock %}
+      {% block styles %}
+      <style>
+      /* Container for the form */
+      .password-reset-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Form Title */
+      .form-title {
+        text-align: center;
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      /* Form styling */
+      .password-reset-form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .password-reset-form .form-group {
+        margin-bottom: 20px;
+      }
+
+      /* Input fields styling */
+      .password-reset-form input[type="email"],
+      .password-reset-form input[type="submit"] {
+        padding: 12px 15px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      /* Focus state for inputs */
+      .password-reset-form input[type="email"]:focus,
+      .password-reset-form input[type="submit"]:focus {
+        outline: none;
+        border-color: #eb5424; /* Highlight color */
+      }
+
+      /* Submit button styling */
+      .submit-btn {
+        background-color: #eb5424;
+        color: #fff;
+        border: none;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        border-radius: 5px;
+      }
+
+      /* Hover effect for button */
+      .submit-btn:hover {
+        background-color: #c44d1f;
+      }
+
+      /* Add responsive behavior */
+      @media (max-width: 600px) {
+        .password-reset-container {
+          padding: 20px;
+        }
+
+        .form-title {
+          font-size: 20px;
+        }
+      }
+      </style>
+      {% endblock styles %}
+
+    </div>
+  </div>
+</body>
+</html>
